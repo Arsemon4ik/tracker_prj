@@ -1,0 +1,380 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Schemas{% endblock title %}
+
+{% block content %}
+
+    {% include 'navbar.html' %}
+    <div class="px-5 w-100">
+        <div class="d-flex justify-content-between">
+            <h2 class="py-3 ml-5">Додати новий предмет</h2>
+            <h2 class="py-3 mr-5">Додати нове завдання</h2>
+        </div>
+        <div class="d-flex justify-content-around">
+            <form class="mt-4 w-25" action="" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="username">Тема</label>
+                    {{ subject_form.theme }}
+                </div>
+                <div class="form-group">
+                    <label for="email">Опис</label>
+                    {{ subject_form.description }}
+                </div>
+                <div class="form-group">
+                    <label for="username">Максимальна кіл. балів</label>
+                    {{ subject_form.max_score }}
+                </div>
+                <div class="form-group d-flex flex-row-reverse">
+                    <button type="submit" name="btn-subject"
+                            class="btn btn-success rounded py-2 px-2 h-25 my-3 border-0">Новий предмет
+                    </button>
+                </div>
+            </form>
+            <div>
+                <canvas id="myChart" width="450" height="450"></canvas>
+            </div>
+
+            <form class="mt-4 w-25" action="" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="name">Назва</label>
+                    {{ task_form.name }}
+                </div>
+                <div class="form-group">
+                    <label for="subject">Предмет</label>
+                    {{ task_form.subject }}
+                </div>
+                <div class="form-group" style="margin-bottom: 27px;">
+                    <label for="score">Кіл. балів</label>
+                    {{ task_form.score }}
+                </div>
+                <div class="form-group">
+                    <label for="deadline">Дедлайн</label>
+                    {{ task_form.deadline }}
+                </div>
+                <div class="form-group">
+                    <label for="status">Статус</label>
+                    {{ task_form.status }}
+                </div>
+                <div class="form-group d-flex flex-row-reverse">
+                    <button type="submit" name="btn-task" class="btn btn-success rounded py-2 px-2 h-25 my-3 border-0">
+                        Нове завдання
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="w-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="py-3">Мої завдання</h2>
+            </div>
+            {% if tasks %}
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Назва</th>
+                        <th scope="col">Предмет</th>
+                        <th scope="col">Створено</th>
+                        <th scope="col">Дедлайн</th>
+                        <th scope="col">Статус</th>
+                        <th scope="col">Кіл. балів</th>
+                        <th scope="col" style="width: 353px">Редагування / Видалення</th>
+                    </tr>
+                    </thead>
+                    <tbody id="data_sets_table">
+                    {% if tasks %}
+                        {% for task in tasks %}
+                            {#                            {% if task.deadline| == '0 хвилин' %}#}
+                            {% load index %}
+{#                            <h1>{{ task.deadline|deadline }}</h1>#}
+                            {% if task.deadline|deadline == 1 %}
+                                <tr style="background-color: rgba(255, 0, 0, 0.8);">
+                                    <th scope="row">{{ forloop.counter }}</th>
+                                    <td>{{ task.name }}</td>
+                                    <td>{{ task.subject.theme|default:"Не обрано" }}</td>
+                                    <td>{{ task.created_at|timesince }} тому</td>
+                                    <td>{{ task.deadline|timeuntil }}</td>
+                                    <td>{{ task.get_status_display }}</td>
+                                    <td>
+                                        {{ task.score }}
+                                    </td>
+                                    <td><a href="{% url 'edit_task' task.id %}"
+                                           class="link-primary mr-4">Редагувати</a>
+                                        <a href=""
+                                           class="text-danger"
+                                           data-toggle="modal"
+                                           data-target="#exampleModalSchema{{ task.id }}">Видалити</a>
+
+                                        <!-- Modal delete schema !-->
+
+                                        <div class="modal fade" id="exampleModalSchema{{ task.id }}" tabindex="-1"
+                                             role="dialog" aria-labelledby="exampleModalSchema"
+                                             aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title"
+                                                            id="exampleModalLabel{{ task.id }}">Ви впевнені, що
+                                                            хочете видалити це завдання?</h5>
+                                                        <button type="button" class="close" data-dismiss="modal"
+                                                                aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <a href="{% url 'delete_task' task.id %}" type="button"
+                                                           class="btn btn-primary">Так, видалити!</a>
+                                                        <button type="button" class="btn btn-secondary"
+                                                                data-dismiss="modal">Закрити вікно
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- End Modal delete schema !-->
+
+                                    </td>
+                                </tr>
+
+                            {% elif task.deadline|deadline == 2 %}
+                                <tr style="background-color: rgba(255,165,0, 0.8);">
+                                    <th scope="row">{{ forloop.counter }}</th>
+                                    <td>{{ task.name }}</td>
+                                     <td>{{ task.subject.theme|default:"Не обрано" }}</td>
+                                    <td>{{ task.created_at|timesince }} тому</td>
+                                    <td>{{ task.deadline|timeuntil }}</td>
+                                    <td>{{ task.get_status_display }}</td>
+                                    <td>
+                                        {{ task.score }}
+                                    </td>
+                                    <td><a href="{% url 'edit_task' task.id %}"
+                                           class="link-primary mr-4">Редагувати</a>
+                                        <a href=""
+                                           class="text-danger"
+                                           data-toggle="modal"
+                                           data-target="#exampleModalSchema{{ task.id }}">Видалити</a>
+
+                                        <!-- Modal delete schema !-->
+
+                                        <div class="modal fade" id="exampleModalSchema{{ task.id }}" tabindex="-1"
+                                             role="dialog" aria-labelledby="exampleModalSchema"
+                                             aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title"
+                                                            id="exampleModalLabel{{ task.id }}">Ви впевнені, що
+                                                            хочете видалити це завдання?</h5>
+                                                        <button type="button" class="close" data-dismiss="modal"
+                                                                aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <a href="{% url 'delete_task' task.id %}" type="button"
+                                                           class="btn btn-primary">Так, видалити!</a>
+                                                        <button type="button" class="btn btn-secondary"
+                                                                data-dismiss="modal">Закрити вікно
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- End Modal delete schema !-->
+
+                                    </td>
+                                </tr>
+
+                            {% else %}
+                                <tr style="background-color: rgba(46, 204, 113, 0.8);">
+                                    <th scope="row">{{ forloop.counter }}</th>
+                                    <td>{{ task.name }}</td>
+                                     <td>{{ task.subject.theme|default:"Не обрано" }}</td>
+                                    <td>{{ task.created_at|timesince }} тому</td>
+                                    <td>{{ task.deadline|timeuntil }}</td>
+                                    <td>{{ task.get_status_display }}</td>
+                                    <td>
+                                        {{ task.score }}
+                                    </td>
+                                    <td><a href="{% url 'edit_task' task.id %}"
+                                           class="link-primary mr-4">Редагувати</a>
+                                        <a href=""
+                                           class="text-danger"
+                                           data-toggle="modal"
+                                           data-target="#exampleModalSchema{{ task.id }}">Видалити</a>
+
+                                        <!-- Modal delete schema !-->
+
+                                        <div class="modal fade" id="exampleModalSchema{{ task.id }}" tabindex="-1"
+                                             role="dialog" aria-labelledby="exampleModalSchema"
+                                             aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title"
+                                                            id="exampleModalLabel{{ task.id }}">Ви впевнені, що
+                                                            хочете видалити це завдання?</h5>
+                                                        <button type="button" class="close" data-dismiss="modal"
+                                                                aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <a href="{% url 'delete_task' task.id %}" type="button"
+                                                           class="btn btn-primary">Так, видалити!</a>
+                                                        <button type="button" class="btn btn-secondary"
+                                                                data-dismiss="modal">Закрити вікно
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- End Modal delete schema !-->
+
+                                    </td>
+                                </tr>
+                            {% endif %}
+
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
+            {% else %}
+                <h2 class="text-center py-4">Ви ще не додали жодного завдання!</h2>
+            {% endif %}
+
+        </div>
+        <div class="w-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="py-3">Мої предмети</h2>
+            </div>
+            {% if subjects %}
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Тема</th>
+                        <th scope="col">Опис</th>
+                        <th scope="col">Загальна кіл. балів</th>
+                        <th scope="col">Редагування / Видалення</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for subject in subjects %}
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td><a href="{% url 'tasks_by_subject' subject.id %}"
+                                   class="link-primary mr-4">{{ subject.theme }}</a>
+                            </td>
+                            <td>{{ subject.description|truncatechars:30 }}</td>
+                            <td>{{ subject.max_score }}</td>
+                            <td><a href="{% url 'edit_subject' subject.id %}"
+                                   class="link-primary mr-4">Редагувати</a>
+                                <a href=""
+                                   class="text-danger"
+                                   data-toggle="modal"
+                                   data-target="#exampleModalSchema{{ subject.id }}">Видалити</a>
+
+                                <!-- Modal delete schema !-->
+
+                                <div class="modal fade" id="exampleModalSchema{{ subject.id }}" tabindex="-1"
+                                     role="dialog" aria-labelledby="exampleModalSchema"
+                                     aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title"
+                                                    id="exampleModalLabel{{ subject.id }}">Ви впевнені, що
+                                                    хочете видалити цей предмет?</h5>
+                                                <button type="button" class="close" data-dismiss="modal"
+                                                        aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="{% url 'delete_subject' subject.id %}" type="button"
+                                                   class="btn btn-primary">Так, видалити!</a>
+                                                <button type="button" class="btn btn-secondary"
+                                                        data-dismiss="modal">Закрити вікно
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- End Modal delete schema !-->
+
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <h2 class="text-center py-4">Ви ще не додали жодного предмету!</h2>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} mb-0 alert-dismissible fade show" role="alert">
+            <strong>Message: </strong> {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    {% endfor %}
+
+{% endblock %}
+
+{% block script %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('myChart');
+
+        let subjects = JSON.parse("{{subject_names}}".replace(/(&quot\;)/g, "\""));
+        const data = {
+            labels: subjects,
+            datasets: [
+                {
+                    {#label: 'Dataset 1',#}
+                    data: JSON.parse("{{task_per_subject}}"),
+                    {#backgroundColor: Object.values(Utils.CHART_COLORS),#}
+                }
+            ]
+        };
+        const config = {
+            type: 'doughnut',
+            data: data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+
+                }
+            },
+        };
+        new Chart(myChart, config)
+    </script>
+
+    {##}
+    {#    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha256-BRqBN7dYgABqtY9Hd4ynE+1slnEw+roEPFzQ7TRRfcg=" crossorigin="anonymous"></script>#}
+    {##}
+    {#    <script src="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.7.7/dist/js/tempus-dominus.min.js"#}
+    {#            crossorigin="anonymous"></script>#}
+    {##}
+    {##}
+    {#    <link rel="stylesheet"#}
+    {#          href="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.7.7/dist/css/tempus-dominus.min.css"#}
+    {#          crossorigin="anonymous">#}
+
+
+{% endblock %}

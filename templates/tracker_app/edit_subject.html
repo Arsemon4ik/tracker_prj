@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Schemas{% endblock title %}
+
+{% block content %}
+
+    {% include 'navbar.html' %}
+    <div class="mx-5 w-75">
+       <h2 class="py-3">Редагувати предмет "{{ subject_theme }}"</h2>
+        <form class="mt-4 w-50" action="" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Тема</label>
+                {{form.theme}}
+            </div>
+            <div class="form-group">
+                <label for="email">Опис</label>
+                {{form.description}}
+            </div>
+            <div class="form-group">
+                <label for="username">Максимальна кіл. балів</label>
+                {{form.max_score}}
+            </div>
+            <div class="form-group d-flex flex-row-reverse">
+                <button type="submit" class="btn btn-success rounded py-2 px-2 h-25 my-3 border-0">Зберегти</button>
+            </div>
+        </form>
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mb-0 alert-dismissible fade show" role="alert">
+                <strong>Message: </strong> {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    </div>
+
+{% endblock %}

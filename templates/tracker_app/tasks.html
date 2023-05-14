@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Data sets{% endblock title %}
+
+{% block content %}
+    {% include 'navbar.html' %}
+    <div class="mx-5">
+        <div class="w-75">
+            <h2 class="py-3">Мої завдання</h2>
+            <table class="table table-bordered mb-5">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Назва</th>
+                    <th scope="col">Створено</th>
+                    <th scope="col">Дедлайн</th>
+                    <th scope="col">Кіл. балів</th>
+                </tr>
+                </thead>
+                <tbody id="data_sets_table">
+                {% if tasks %}
+                    {% for task in tasks %}
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td>{{ task.name}}</td>
+                            <td>{{ task.created_at|timesince }} тому</td>
+                            <td>{{ task.deadline|timeuntil }}</td>
+                            <td>
+                                {{ task.score }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+                </tbody>
+            </table>
+            {% if not tasks %}
+                <h2 class="text-center py-4">Будь-ласка додайте ваші завдання 😊</h2>
+            {% endif %}
+
+        </div>
+    </div>
+
+
+
+{% endblock %}

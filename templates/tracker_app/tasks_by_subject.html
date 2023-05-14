@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load index %}
+{% block title %}Data sets{% endblock title %}
+
+{% block content %}
+    {% include 'navbar.html' %}
+    <div class="mx-5">
+        <div class="w-75">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h2 class="py-3">Завдання по предмету "{{ subject }}"</h2>
+                    <div>
+                        <canvas id="myBarChart" width="200" height="150" style="max-height: 400px; min-width: 600px" ></canvas>
+                    </div>
+                </div>
+                <form class="w-25" action="" method="post">
+                    <h2 class="py-3">Створити завдання</h2>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="name">Назва</label>
+                        {{ form.name }}
+                    </div>
+                    {#                    <div class="form-group">#}
+                    {#                        <label for="subject">Предмет</label>#}
+                    {#                        {{ form.subject }}#}
+                    {#                    </div>#}
+                    <div class="form-group">
+                        <label for="score">Кіл. балів</label>
+                        {{ form.score }}
+                    </div>
+                    <div class="form-group">
+                        <label for="deadline">Дедлайн</label>
+                        {{ form.deadline }}
+                    </div>
+                    <div class="form-group">
+                        <label for="satus">Статус</label>
+                        {{ form.status }}
+                    </div>
+                    <div class="form-group d-flex flex-row-reverse">
+                        <button type="submit"
+                                name="add_task"
+                                class="btn btn-success rounded py-2 px-2 h-25 my-3 border-0">
+                            Нове завдання
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <table class="table table-bordered mb-5">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Назва</th>
+                    {#                    <th scope="col">Створено</th>#}
+                    <th scope="col">Дедлайн</th>
+                    <th scope="col">Статус</th>
+                    <th scope="col">Кіл. балів</th>
+                </tr>
+                </thead>
+                <tbody id="data_sets_table">
+                {% if tasks %}
+                    <form action="" method="post">
+                    {% csrf_token %}
+                    {{ formset.management_form }}
+                    {% for form in formset %}
+                        {% for hidden in form.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+                        {#                        <tr>#}
+                        {#                            <th scope="row">{{ forloop.counter }}</th>#}
+                        {#                            <td>{{ task.name }}</td>#}
+                        {#                            <td>{{ task.created_at|timesince }} тому</td>#}
+                        {#                            <td>{{ task.deadline|timeuntil }}</td>#}
+                        {#                            <td>#}
+                        {#                                {{ task.score }}#}
+                        {#                            </td>#}
+                        {#                        </tr>#}
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td>{{ form.name }}</td>
+
+                            {#                            <td>{{ tasks|index:1 }} тому</td>#}
+
+                            <td>{{ form.deadline }}</td>
+                            <td>{{ form.status }}</td>
+                            <td>
+                                {{ form.score }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <th>Всього:</th>
+                        <td>{{ total_score }}</td>
+                    </tr>
+                    <button type="submit"
+                            name="edit_task"
+                            class="btn btn-success rounded py-2 px-2 h-25 my-3 border-0">
+                        Зберегти
+                    </button>
+                {% endif %}
+
+                </form>
+                </tbody>
+            </table>
+            {% if not tasks %}
+                <h2 class="text-center py-4">Будь-ласка додайте ваші завдання 😊</h2>
+            {% endif %}
+
+        </div>
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mb-0 alert-dismissible fade show" role="alert">
+                <strong>Message: </strong> {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    </div>
+
+
+
+{% endblock %}
+
+{% block script %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctxBar = document.getElementById('myBarChart');
+
+        {#let subjects = JSON.parse("{{subject_names}}".replace(/(&quot\;)/g, "\""));#}
+        const dataBar = {
+            labels: ['Виконано', 'Всього'],
+            datasets: [
+                {
+                    label: ['Виконано', 'Всього'],
+                    {#data: JSON.parse("{{task_per_subject}}"),#}
+                    data: ["{{ total_done }}", "{{ tasks|length }}"],
+                    barPercentage: 1,
+                    backgroundColor: [
+                        'rgba(80, 200, 120, .8)',
+                        'rgba(153, 102, 255, .8)',
+                    ],
+                    barThickness: 80,
+
+                }
+            ]
+        };
+        const configBar = {
+            type: 'bar',
+            data: dataBar,
+            options: {
+                {#responsive: true,#}
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            },
+        };
+        new Chart(ctxBar, configBar)
+    </script>
+
+    {##}
+    {#    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha256-BRqBN7dYgABqtY9Hd4ynE+1slnEw+roEPFzQ7TRRfcg=" crossorigin="anonymous"></script>#}
+    {##}
+    {#    <script src="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.7.7/dist/js/tempus-dominus.min.js"#}
+    {#            crossorigin="anonymous"></script>#}
+    {##}
+    {##}
+    {#    <link rel="stylesheet"#}
+    {#          href="https://cdn.jsdelivr.net/npm/@eonasdan/tempus-dominus@6.7.7/dist/css/tempus-dominus.min.css"#}
+    {#          crossorigin="anonymous">#}
+
+
+{% endblock %}
